@@ -4,6 +4,8 @@ import com.mapr.demo.mqtt.simple.Publisher;
 import com.mapr.demo.mqtt.simple.Subscriber;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
+import java.net.URISyntaxException;
+
 /**
  * Basic launcher for Publisher and Subscriber
  */
@@ -19,7 +21,7 @@ public class MqttApp {
         Publisher.main(args);
         break;
       case "subscriber":
-        Subscriber.main(args);
+          Subscriber.main(args);
         break;
       default:
         throw new IllegalArgumentException("Don't know how to do " + args[0]);

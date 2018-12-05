@@ -1,37 +1,54 @@
 package com.mapr.demo.mqtt.simple;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+
+import java.util.Scanner;
 
 public class Publisher {
 
+  public static void main(String[] args) {
 
-  public static void main(String[] args) throws MqttException {
+    String topic        = "alfred/walk";
+    int qos             = 0;
+    String broker       = "tcp://m12.cloudmqtt.com:17492";
+    String clientId     = "234";
+    MemoryPersistence persistence = new MemoryPersistence();
 
-    String messageString = "Hello World from Java!";
+    try {
+        MqttConnectOptions conOpt = new MqttConnectOptions();
+        conOpt.setCleanSession(true);
+        conOpt.setUserName("qldkjxzp");
+        conOpt.setPassword("gK5_OW6wcgAd".toCharArray());
 
-    if (args.length == 2 ) {
-      messageString = args[1];
+      MqttClient sampleClient = new MqttClient(broker, clientId, new MemoryPersistence());
+      System.out.println("Connecting to broker: "+broker);
+      sampleClient.connect(conOpt);
+      System.out.println("Connected");
+          while (true) {
+              System.out.print("Enter your command: " );
+              Scanner s = new Scanner(System.in);
+              String str = s.nextLine();
+              if(str == "e\n") break;
+              System.out.println("Publishing message: " + str);
+              MqttMessage message = new MqttMessage(str.getBytes());
+              message.setQos(qos);
+              sampleClient.publish(topic, message);
+              System.out.println("Message published");
+          }
+      sampleClient.disconnect();
+      System.out.println("Disconnected");
+      System.exit(0);
+    } catch(MqttException me) {
+      System.out.println("reason "+me.getReasonCode());
+      System.out.println("msg "+me.getMessage());
+      System.out.println("loc "+me.getLocalizedMessage());
+      System.out.println("cause "+me.getCause());
+      System.out.println("excep "+me);
+      me.printStackTrace();
     }
-
-
-    System.out.println("== START PUBLISHER ==");
-
-
-    MqttClient client = new MqttClient("tcp://localhost:1883", MqttClient.generateClientId());
-    client.connect();
-    MqttMessage message = new MqttMessage();
-    message.setPayload(messageString.getBytes());
-    client.publish("iot_data", message);
-
-    System.out.println("\tMessage '"+ messageString +"' to 'iot_data'");
-
-    client.disconnect();
-
-    System.out.println("== END PUBLISHER ==");
-
   }
-
-
 }
