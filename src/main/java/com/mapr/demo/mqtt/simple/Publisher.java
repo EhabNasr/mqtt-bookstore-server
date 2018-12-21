@@ -6,13 +6,18 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+
 import java.util.Scanner;
 
 public class Publisher {
 
   public static void main(String[] args) {
 
-    String topic        = "alfred/walk";
+      String topic        = "alfred/walk";
     int qos             = 0;
     String broker       = "tcp://m12.cloudmqtt.com:17492";
     String clientId     = "234";
@@ -24,10 +29,17 @@ public class Publisher {
         conOpt.setUserName("qldkjxzp");
         conOpt.setPassword("gK5_OW6wcgAd".toCharArray());
 
-      MqttClient sampleClient = new MqttClient(broker, clientId, new MemoryPersistence());
+        MqttClient subscriber_client=new MqttClient(broker, MqttClient.generateClientId(),new MemoryPersistence());
+        subscriber_client.setCallback( new SimpleMqttCallBack() );
+
+        MqttClient publisher_client = new MqttClient(broker, clientId, new MemoryPersistence());
+
       System.out.println("Connecting to broker: "+broker);
-      sampleClient.connect(conOpt);
-      System.out.println("Connected");
+      publisher_client.connect(conOpt);
+      subscriber_client.connect(conOpt);
+      subscriber_client.subscribe(topic);
+
+        System.out.println("Connected");
           while (true) {
               System.out.print("Enter your command: " );
               Scanner s = new Scanner(System.in);
@@ -36,10 +48,10 @@ public class Publisher {
               System.out.println("Publishing message: " + str);
               MqttMessage message = new MqttMessage(str.getBytes());
               message.setQos(qos);
-              sampleClient.publish(topic, message);
+              publisher_client.publish(topic, message);
               System.out.println("Message published");
           }
-      sampleClient.disconnect();
+      publisher_client.disconnect();
       System.out.println("Disconnected");
       System.exit(0);
     } catch(MqttException me) {
